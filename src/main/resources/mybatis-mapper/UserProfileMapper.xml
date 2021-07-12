@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.koreait.facebook.user.UserProfileMapper">
+    <insert id="insUserProfile">
+        INSERT INTO t_user_profile
+        ( iuser, img )
+        VALUES
+        ( #{iuser}, #{img} )
+    </insert>
+
+    <select id="selUserProfile" resultType="UserDomain">
+        SELECT
+            A.iuser, A.email, A.nm, A.tel, A.mainProfile, A.regdt
+            , (SELECT COUNT(ifeed) FROM t_feed WHERE iuser = ${youIuser}) AS cntFeed
+            , (SELECT COUNT(iuserMe) FROM t_user_follow WHERE iuserMe = ${youIuser}) AS cntFollow
+            , (SELECT COUNT(iuserYou) FROM t_user_follow WHERE iuserYou = ${youIuser}) AS cntFollower
+            , (SELECT COUNT(iuserMe) FROM t_user_follow WHERE iuserMe = ${youIuser} AND iuserYou = ${meIuser}) AS isYouFollowMe
+            , (SELECT COUNT(iuserMe) FROM t_user_follow WHERE iuserMe = ${meIuser} AND iuserYou = ${youIuser}) AS isMeFollowYou
+        FROM t_user A
+        WHERE A.iuser = ${youIuser}
+    </select>
+
+    <select id="selUserProfileList" resultType="UserProfileEntity">
+        SELECT iprofile, img
+        FROM t_user_profile
+        WHERE iuser = ${iuser}
+    </select>
+
+</mapper>

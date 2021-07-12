@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.koreait.facebook.user.UserMapper">
+
+    <insert id="join">
+        INSERT INTO t_user
+        ( email, pw, nm, tel, authCd )
+        VALUES
+        ( #{email}, #{pw}, #{nm}, #{tel}, #{authCd} )
+    </insert>
+
+    <select id="selUser" resultType="UserEntity">
+        SELECT * FROM t_user
+        WHERE email = #{email}
+        AND authCd IS NULL
+    </select>
+
+    <update id="auth">
+        UPDATE t_user
+        SET authCd = null
+        WHERE email = #{email} AND authCd = #{authCd}
+    </update>
+
+    <update id="updUser">
+        UPDATE t_user
+        <set>
+            <if test="mainProfile != null and mainProfile != '' ">
+                mainProfile = #{mainProfile}
+            </if>
+            <if test="pw != null and pw != '' ">
+                pw = #{pw}
+            </if>
+            <if test="nm != null and nm != '' ">
+                nm = #{nm}
+            </if>
+            <if test="tel != null and tel != '' ">
+                tel = #{tel}
+            </if>
+        </set>
+        WHERE iuser = #{iuser}
+    </update>
+
+    <update id="updUserMainProfile">
+        UPDATE t_user A
+        INNER JOIN t_user_profile B
+        ON A.iuser = B.iuser
+        AND B.iprofile = #{iprofile}
+        SET A.mainProfile = B.img
+        WHERE A.iuser = #{iuser}
+
+        <selectKey order="AFTER" resultType="String" keyColumn="mainProfile" keyProperty="img">
+            SELECT mainProfile FROM t_user WHERE iuser = #{iuser}
+        </selectKey>
+    </update>
+
+    <!-- ////////////////////////////  follow [start] ///////// -->
+    <insert id="insUserFollow">
+        INSERT INTO t_user_follow
+        ( iuserMe, iuserYou )
+        VALUES
+        ( ${iuserMe}, ${iuserYou} )
+    </insert>
+
+    <select id="selUserFollow" resultType="UserFollowEntity">
+        SELECT iuserMe, iuserYou, regdt FROM t_user_follow
+        WHERE iuserMe = ${iuserMe}
+        AND iuserYou = ${iuserYou}
+    </select>
+
+    <select id="selUserFollowList" resultType="UserDomain">
+        SELECT B.iuser, B.nm, B.mainProfile,
+        case when C.iuserMe IS NULL then 0 ELSE 1 END AS isMeFollowYou
+        FROM t_user_follow A
+        INNER JOIN t_user B
+        ON A.iuser=B.iuser
+        AND iuserMe=${iuserYou}; -- 프로필 주인장 pk
+        LEFT JOIN t_user_follow C
+        ON C.iuserMe=${iuserMe}	--로그인한 사람 pk
+        AND C.iuserYou = A.iuserYou;
+    </select>
+
+    <delete id="delUserFollow">
+        DELETE from t_user_follow
+        WHERE iuserMe = ${iuserMe} AND iuserYou = ${iuserYou}
+    </delete>
+
+</mapper>
