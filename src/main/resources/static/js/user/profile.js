@@ -6,6 +6,7 @@ const profileImgElem = document.querySelector('#profileImg');
 const followerElemArr=document.querySelectorAll('.pointer.follower')
 const followElemArr=document.querySelectorAll('.pointer.follow')/*띄우면 밑에 있는거*/
 const modalFollowElem=document.querySelector('.modal-follow')
+const modalFollowTitleElem=modalFollowElem.querySelector('#title')
 const modalFollowCloseElem=document.querySelector('.modal-follow #madal-follow-close')
 const modalFollowItemConElem=modalFollowElem.querySelector('.followCont')
 
@@ -18,6 +19,7 @@ if(modalFollowCloseElem){
 if(followerElemArr){
     followerElemArr.ferEach(item=>{
         item.addEventListener('click',()=>{
+            modalFollowTitleElem.innerText='팔로워'
             modalFollowElem.classList.remove('hide')
         })
     })
@@ -25,6 +27,7 @@ if(followerElemArr){
 if(followElemArr){
     followElemArr.ferEach(item=>{
         item.addEventListener('click',()=>{
+            modalFollowTitleElem.innerText='팔로우'
             modalFollowElem.classList.remove('hide')
 
             modalFollowItemConElem.innerHTML=''
@@ -43,21 +46,29 @@ if(followElemArr){
 }
 
 function makeFollowItem(item){
-    const myIuser=localConstElem.dataset.iuser
+    const globalContElem=document.querySelector('#globalConst')
+    const myIuser=globalContElem.dataset.iuser
 
     const cont= document.createElement('div')
+    cont.localName='follow-item'
     const img= document.createElement('img')
+    img.src=`/pic/profile/${item.iuser}/${item.mainProfile}`
+    img.onerror= ()=>{
+        img.style.visibility='hidden'
+    }
     const nm=document.createElement('div')
+    nm.innerText=item.nm
     const btn=document.createElement('input')
 
     cont.append(img)
     cont.append(nm)
-    if(myIuser !==item.iuser){
+    if(parseInt(myIuser)!==item.iuser){
         btn.type='button'
         if(item.isMeFollowYou){
             btn.value='팔로우 취소'
         }
         else{
+            btn.classList.add('instaBtnEnable')
             btn.value='팔로우'
         }
         cont.append(btn)
