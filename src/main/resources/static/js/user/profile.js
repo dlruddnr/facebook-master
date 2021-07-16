@@ -17,7 +17,7 @@ if(modalFollowCloseElem){
 }
 
 if(followerElemArr){
-    followerElemArr.ferEach(item=>{
+    followerElemArr.forEach(item=>{
         item.addEventListener('click',()=>{
             modalFollowTitleElem.innerText='팔로워'
             modalFollowElem.classList.remove('hide')
@@ -37,7 +37,7 @@ if(followerElemArr){
     })
 }
 if(followElemArr){
-    followElemArr.ferEach(item=>{
+    followElemArr.forEach(item=>{
         item.addEventListener('click',()=>{
             modalFollowTitleElem.innerText='팔로우'
             modalFollowElem.classList.remove('hide')

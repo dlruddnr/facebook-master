@@ -8,6 +8,7 @@ import com.koreait.facebook.feed.FeedMapper;
 import com.koreait.facebook.feed.model.FeedDTO;
 import com.koreait.facebook.feed.model.FeedDomain2;
 import com.koreait.facebook.security.IAuthenticationFacade;
+import com.koreait.facebook.security.UserDetailsServiceImpl;
 import com.koreait.facebook.user.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,7 +22,6 @@ import java.util.Map;
 @Service
 public class UserService {
     @Autowired private EmailService email;
-    @Autowired private MySecurityUtils secUtils;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private IAuthenticationFacade auth;
     @Autowired private MyFileUtils myFileUtils;
@@ -29,6 +29,8 @@ public class UserService {
     @Autowired private FeedMapper feedMapper;
     @Autowired private UserProfileMapper profileMapper;
     @Autowired private MyConst myConst;
+    @Autowired private MySecurityUtils secUtils;
+    @Autowired private UserDetailsServiceImpl userDetailService;
 
     public int join(UserEntity param) {
         String authCd = secUtils.getRandomDigit(5);
@@ -37,7 +39,8 @@ public class UserService {
         String hashedPw = passwordEncoder.encode(param.getPw());
         param.setPw(hashedPw);
         param.setAuthCd(authCd);
-        int result = mapper.join(param);
+        param.setProvider("local");
+        int result = userDetailService.join(param);
 
         if(result == 1) { //메일 쏘기!! (id, authcd값을 메일로 쏜다.)
             String subject = "[얼굴책] 인증메일입니다.";
@@ -105,11 +108,6 @@ public class UserService {
         return res;
     }
 
-    public List<FeedDomain2> selFeedList2(FeedDTO param) {
-        return feedMapper.selFeedList2(param);
-    }
-
-
     //팔로우 하기
     public Map<String, Object> insUserFollow(UserFollowEntity param) {
         param.setIuserMe(auth.getLoginUserPk());
@@ -118,12 +116,15 @@ public class UserService {
         return res;
     }
 
-    public List<UserDomain> selUserFollowList(UserFollowEntity param){
+    public List<FeedDomain2> selFeedList2(FeedDTO param) {
+        return feedMapper.selFeedList2(param);
+    }
+    public List<UserDomain> selUserFollowList(UserFollowEntity param) {
         param.setIuserMe(auth.getLoginUserPk());
         return mapper.selUserFollowList(param);
     }
 
-    public List<UserDomain> selUserFollowerList(UserFollowEntity param){
+    public List<UserDomain> selUserFollowerList(UserFollowEntity param) {
         param.setIuserMe(auth.getLoginUserPk());
         return mapper.selUserFollowerList(param);
     }
@@ -146,4 +147,3 @@ public class UserService {
         return res;
     }
 }
-
